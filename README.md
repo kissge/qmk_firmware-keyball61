@@ -1,3 +1,13 @@
+# Keyball61 kissge mod.
+
+```sh
+qmk flash -kb keyball/keyball61 -km via
+```
+
+qmk/qmk_firmwareとYowkees/keyballの直接のマージになっているので、upstreamの変更への追従には通常のgit mergeを行えばよい。
+
+----
+
 # keyball
 
 Keyball is split keyboard has 100% track ball

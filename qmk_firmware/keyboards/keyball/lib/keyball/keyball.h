@@ -86,14 +86,32 @@ enum keyball_keycodes {
     SCRL_DVI, // Increment scroll divider
     SCRL_DVD, // Decrement scroll divider
 
+    NEXT_TAB,
+    PREV_TAB,
+    CLOSE_TAB,
+    REOPEN_TAB,
+    CLOSE_WIN,
+    NEW_TAB,
+    FORWARD,
+    BACK,
+    IME,
+    CHANGE_OS,
+
     KEYBALL_SAFE_RANGE,
 };
+
+
+typedef enum {
+    KISSGE_OS_MACOS = 0,
+    KISSGE_OS_WINDOWS,
+} kissge_os_t;
 
 typedef union {
     uint32_t raw;
     struct {
         uint8_t cpi : 7;
         uint8_t sdiv : 3; // scroll divider
+        kissge_os_t os_mode : 1;
     };
 } keyball_config_t;
 
@@ -129,6 +147,8 @@ typedef struct {
     uint16_t       last_kc;
     keypos_t       last_pos;
     report_mouse_t last_mouse;
+
+    kissge_os_t os_mode;
 } keyball_t;
 
 typedef enum {
