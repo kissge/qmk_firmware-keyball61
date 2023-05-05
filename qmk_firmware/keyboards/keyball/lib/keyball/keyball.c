@@ -375,6 +375,8 @@ void keyball_oled_render_ballinfo(void) {
 
 void keyball_oled_render_keyinfo(void) {
 #ifdef OLED_ENABLE
+    oled_write_ln_P(keyball.os_mode == KISSGE_OS_MACOS ? PSTR("macOS mode") : PSTR("Windows mode"), false);
+
     // Format: `Key :  R{row}  C{col} K{kc}  '{name}`
     //
     // Where `kc` is lower 8 bit of keycode.
@@ -463,6 +465,7 @@ void keyboard_post_init_kb(void) {
         keyball_config_t c = {.raw = eeconfig_read_kb()};
         keyball_set_cpi(c.cpi);
         keyball_set_scroll_div(c.sdiv);
+        keyball.os_mode = c.os_mode;
     }
 
     keyball_on_adjust_layout(KEYBALL_ADJUST_PENDING);
@@ -480,6 +483,15 @@ void housekeeping_task_kb(void) {
     }
 }
 #endif
+
+static inline void save_config(void) {
+    keyball_config_t c = {
+        .cpi  = keyball.cpi_value,
+        .sdiv = keyball.scroll_div,
+        .os_mode = keyball.os_mode,
+    };
+    eeconfig_update_kb(c.raw);
+}
 
 bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
     // store last keycode, row, and col for OLED
@@ -515,17 +527,90 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
     // process events which works on pressed only.
     if (record->event.pressed) {
         switch (keycode) {
+            case NEXT_TAB:
+                if (keyball.os_mode == KISSGE_OS_MACOS) {
+                    SEND_STRING(SS_LCTRL(SS_TAP(X_TAB)));
+                } else {
+                    SEND_STRING(SS_LCTRL(SS_TAP(X_PGDOWN)));
+                }
+                break;
+
+            case PREV_TAB:
+                if (keyball.os_mode == KISSGE_OS_MACOS) {
+                    SEND_STRING(SS_LCTRL(SS_LSFT(SS_TAP(X_TAB))));
+                } else {
+                    SEND_STRING(SS_LCTRL(SS_TAP(X_PGUP)));
+                }
+                break;
+
+            case CLOSE_TAB:
+                if (keyball.os_mode == KISSGE_OS_MACOS) {
+                    SEND_STRING(SS_LGUI(SS_TAP(X_W)));
+                } else {
+                    SEND_STRING(SS_LCTRL(SS_TAP(X_W)));
+                }
+                break;
+
+            case REOPEN_TAB:
+                if (keyball.os_mode == KISSGE_OS_MACOS) {
+                    SEND_STRING(SS_LGUI(SS_LSFT(SS_TAP(X_T))));
+                } else {
+                    SEND_STRING(SS_LCTRL(SS_LSFT(SS_TAP(X_T))));
+                }
+                break;
+
+            case CLOSE_WIN:
+                if (keyball.os_mode == KISSGE_OS_MACOS) {
+                    SEND_STRING(SS_LGUI(SS_LSFT(SS_TAP(X_W))));
+                } else {
+                    SEND_STRING(SS_LALT(SS_TAP(X_F4)));
+                }
+                break;
+
+            case NEW_TAB:
+                if (keyball.os_mode == KISSGE_OS_MACOS) {
+                    SEND_STRING(SS_LGUI(SS_TAP(X_T)));
+                } else {
+                    SEND_STRING(SS_LCTRL(SS_TAP(X_T)));
+                }
+                break;
+
+            case FORWARD:
+                if (keyball.os_mode == KISSGE_OS_MACOS) {
+                    SEND_STRING(SS_LGUI(SS_TAP(X_RIGHT)));
+                } else {
+                    SEND_STRING(SS_LALT(SS_TAP(X_RIGHT)));
+                }
+                break;
+
+            case BACK:
+                if (keyball.os_mode == KISSGE_OS_MACOS) {
+                    SEND_STRING(SS_LGUI(SS_TAP(X_LEFT)));
+                } else {
+                    SEND_STRING(SS_LALT(SS_TAP(X_LEFT)));
+                }
+                break;
+
+            case IME:
+                if (keyball.os_mode == KISSGE_OS_MACOS) {
+                    SEND_STRING(SS_LCTRL(SS_TAP(X_SPACE)));
+                } else {
+                    SEND_STRING(SS_LALT(SS_TAP(X_GRAVE)));
+                }
+                break;
+
+            case CHANGE_OS:
+                keyball.os_mode = keyball.os_mode == KISSGE_OS_MACOS ? KISSGE_OS_WINDOWS : KISSGE_OS_MACOS;
+                save_config();
+                break;
+
             case KBC_RST:
                 keyball_set_cpi(0);
                 keyball_set_scroll_div(0);
                 break;
-            case KBC_SAVE: {
-                keyball_config_t c = {
-                    .cpi  = keyball.cpi_value,
-                    .sdiv = keyball.scroll_div,
-                };
-                eeconfig_update_kb(c.raw);
-            } break;
+            case KBC_SAVE:
+                save_config();
+                break;
 
             case CPI_I100:
                 add_cpi(1);
