@@ -512,8 +512,8 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
         // process KC_MS_BTN1~8 by myself
         // See process_action() in quantum/action.c for details.
         case KC_MS_BTN1 ... KC_MS_BTN8: {
-            extern void register_button(bool, enum mouse_buttons);
-            register_button(record->event.pressed, MOUSE_BTN_MASK(keycode - KC_MS_BTN1));
+            extern void register_mouse(uint8_t mouse_keycode, bool pressed);
+            register_mouse(keycode, record->event.pressed);
             // to apply QK_MODS actions, allow to process others.
             return true;
         }
@@ -529,17 +529,17 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
         switch (keycode) {
             case NEXT_TAB:
                 if (keyball.os_mode == KISSGE_OS_MACOS) {
-                    SEND_STRING(SS_LCTRL(SS_TAP(X_TAB)));
+                    SEND_STRING(SS_LCTL(SS_TAP(X_TAB)));
                 } else {
-                    SEND_STRING(SS_LCTRL(SS_TAP(X_PGDOWN)));
+                    SEND_STRING(SS_LCTL(SS_TAP(X_PGDN)));
                 }
                 break;
 
             case PREV_TAB:
                 if (keyball.os_mode == KISSGE_OS_MACOS) {
-                    SEND_STRING(SS_LCTRL(SS_LSFT(SS_TAP(X_TAB))));
+                    SEND_STRING(SS_LCTL(SS_LSFT(SS_TAP(X_TAB))));
                 } else {
-                    SEND_STRING(SS_LCTRL(SS_TAP(X_PGUP)));
+                    SEND_STRING(SS_LCTL(SS_TAP(X_PGUP)));
                 }
                 break;
 
@@ -547,7 +547,7 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
                 if (keyball.os_mode == KISSGE_OS_MACOS) {
                     SEND_STRING(SS_LGUI(SS_TAP(X_W)));
                 } else {
-                    SEND_STRING(SS_LCTRL(SS_TAP(X_W)));
+                    SEND_STRING(SS_LCTL(SS_TAP(X_W)));
                 }
                 break;
 
@@ -555,7 +555,7 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
                 if (keyball.os_mode == KISSGE_OS_MACOS) {
                     SEND_STRING(SS_LGUI(SS_LSFT(SS_TAP(X_T))));
                 } else {
-                    SEND_STRING(SS_LCTRL(SS_LSFT(SS_TAP(X_T))));
+                    SEND_STRING(SS_LCTL(SS_LSFT(SS_TAP(X_T))));
                 }
                 break;
 
@@ -571,7 +571,7 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
                 if (keyball.os_mode == KISSGE_OS_MACOS) {
                     SEND_STRING(SS_LGUI(SS_TAP(X_T)));
                 } else {
-                    SEND_STRING(SS_LCTRL(SS_TAP(X_T)));
+                    SEND_STRING(SS_LCTL(SS_TAP(X_T)));
                 }
                 break;
 
@@ -593,7 +593,7 @@ bool process_record_kb(uint16_t keycode, keyrecord_t *record) {
 
             case IME:
                 if (keyball.os_mode == KISSGE_OS_MACOS) {
-                    SEND_STRING(SS_LCTRL(SS_TAP(X_SPACE)));
+                    SEND_STRING(SS_LCTL(SS_TAP(X_SPACE)));
                 } else {
                     SEND_STRING(SS_LALT(SS_TAP(X_GRAVE)));
                 }
